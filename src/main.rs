@@ -25,7 +25,7 @@ fn setup(filename: &str) -> Network {
     for line in lines {
         let mut parts = line.split("=");
         let key = parts.next().unwrap().trim();
-        if key.chars().nth(2).unwrap() == 'A' {
+        if key.ends_with("A") {
             starters.push(key.to_string());
         } 
         let value = parts.next().unwrap().trim();
@@ -56,7 +56,7 @@ fn part_1(filename: &str) -> i32 {
     let mut steps = 0;
     let mut current = "AAA".to_string();
     let mut i = 0;
-    while current != String::from("ZZZ") {
+    while current != *"ZZZ" {
         let node = network.nodes.get(&current).unwrap();
         let instruction = network.instructions[i];
         if instruction == 'L' {
