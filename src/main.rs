@@ -38,6 +38,19 @@ fn setup(filename: &str) -> Network {
     Network { instructions, nodes, starters }
 }
 
+fn lcm(numbers: Vec<usize>) -> usize {
+    let mut result = numbers[0];
+    for i in 1..numbers.len() {
+        result = (numbers[i] * result) / gcd(numbers[i], result);
+    }
+    result
+}
+
+fn gcd(a: usize, b: usize) -> usize {
+    if b == 0 { return a; }
+    gcd(b, a % b)
+}
+
 fn part_1(filename: &str) -> i32 {
     let network = setup(filename);
     let mut steps = 0;
@@ -58,37 +71,34 @@ fn part_1(filename: &str) -> i32 {
     steps
 }
 
-fn part_2(filename: &str) -> i32 {
+fn part_2(filename: &str) -> usize {
     let network = setup(filename);
-    let mut steps = 0;
-    let mut starters = network.starters;
-    let mut i = 0;
+    let mut loops = Vec::new();
 
-    println!("{:?}", starters);
-    while starters.iter().any(|s| s.chars().nth(2).unwrap() != 'Z') {
-        let mut new_starters = Vec::new();
-        let instruction = network.instructions[i];
-        for current in starters {
+    for starter in network.starters {
+        let mut steps = 0;
+        let mut current = starter;
+        let mut i = 0;
+        while !current.ends_with("Z") {
             let node = network.nodes.get(&current).unwrap();
+            let instruction = network.instructions[i];
             if instruction == 'L' {
-                new_starters.push(node.left.clone());
+                current = node.left.clone();
             } else {
-                new_starters.push(node.right.clone());
+                current = node.right.clone();
             }
+            steps += 1;
+            i += 1;
+            if i == network.instructions.len() { i = 0; }
         }
-        starters = new_starters;
-        steps += 1;
-        i += 1;
-        if i == network.instructions.len() { i = 0; }
-        // println!("{:?}", starters);
+        loops.push(steps as usize);
     }
-    steps
+    lcm(loops)
 }
 
 fn main() {
     assert_eq!(part_1("example.txt"), 6);
     assert_eq!(part_1("input.txt"), 15989);
     assert_eq!(part_2("example_2.txt"), 6);
-    println!("part 1: {}", part_2("input.txt"));
-    //assert_eq!(part_2("input.txt"), 0);
+    assert_eq!(part_2("input.txt"), 13830919117339);
 }
